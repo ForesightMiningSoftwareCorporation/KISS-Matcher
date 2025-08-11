@@ -156,7 +156,7 @@ RegistrationSolution KISSMatcher::pruneAndSolve(const std::vector<Eigen::Vector3
     corres.emplace_back(i, i);
   }
   const auto &pruned_indices =
-      robin_matching_->applyOutlierPruning(src_matched, tgt_matched, "max_core");
+      robin_matching_->applyOutlierPruning(src_matched, tgt_matched, RobinMode::max_core);
   size_t num_pruned_corr = pruned_indices.size();
 
   Eigen::Matrix<double, 3, Eigen::Dynamic> src_eigen(3, num_pruned_corr);

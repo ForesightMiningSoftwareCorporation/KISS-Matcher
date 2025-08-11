@@ -26,6 +26,8 @@
 
 namespace kiss_matcher {
 
+enum RobinMode : uint32_t { none, max_core, max_clique };
+
 class ROBINMatching {
  public:
   typedef std::vector<Eigen::VectorXf> Feature;
@@ -45,7 +47,7 @@ class ROBINMatching {
       std::vector<Eigen::Vector3f>& target_points,
       Feature& source_features,
       Feature& target_features,
-      std::string robin_mode,
+      RobinMode robin_mode,
       float tuple_scale   = 0.95,
       bool use_ratio_test = false);
 
@@ -53,7 +55,7 @@ class ROBINMatching {
   // ttps://arxiv.org/pdf/2409.15615
   std::vector<size_t> applyOutlierPruning(const std::vector<Eigen::Vector3f>& src_matched,
                                           const std::vector<Eigen::Vector3f>& tgt_matched,
-                                          const std::string& robin_mode = "max_core");
+                                          RobinMode robin_mode = RobinMode::max_core);
 
   inline std::vector<std::pair<int, int>> getCrossCheckedCorrespondences() {
     std::vector<std::pair<int, int>> corres_out;
@@ -110,7 +112,7 @@ class ROBINMatching {
   // For this reason, we over-add isValidIndex for the safety purpose
   bool isValidIndex(const size_t index, const size_t vector_size) { return index < vector_size; }
 
-  void match(const std::string& robin_mode, float tuple_scale, bool use_ratio_test = false);
+  void match(RobinMode robin_mode, float tuple_scale, bool use_ratio_test = false);
 
   void setStatuses();
 
@@ -122,7 +124,7 @@ class ROBINMatching {
   // ttps://arxiv.org/pdf/2409.15615
   void applyOutlierPruning(const std::vector<std::pair<int, int>>& corres,
                            std::vector<std::pair<int, int>>& corres_out,
-                           const std::string& robin_mode = "max_core");
+                           RobinMode robin_mode = RobinMode::max_core);
 
   std::vector<std::pair<int, int>> corres_cross_checked_;
   std::vector<std::pair<int, int>> corres_;

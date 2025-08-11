@@ -40,23 +40,21 @@ struct KISSMatcherConfig {
   // Graph-theoretic outlier rejection parms
   float thr_linearity_ = 1.0;  // 1.0 means that we won't use linearity-based filtering
   // NOTE(hlim): The final `robin_noise_bound` becomes `voxel_size_` * `robin_noise_bound_gain_`
-  float robin_noise_bound_gain_ = 1.0;
-  float robin_noise_bound_      = voxel_size_ * robin_noise_bound_gain_;
+  float robin_noise_bound_ = voxel_size_ * 1.0;
 
   // matching params
   // NOTE(hlim): For better usability for map-level registration, I set `true` as a default
   // Enabling `use_ratio_test_` may cause a slight slowdown,
   // and its impact is insignificant at the scan level.
-  bool use_ratio_test_    = true;
-  std::string robin_mode_ = "max_core";
-  float tuple_scale_      = 0.95;
-  int num_max_corr_       = 5000;
+  bool use_ratio_test_  = true;
+  RobinMode robin_mode_ = RobinMode::max_core;
+  float tuple_scale_    = 0.95;
+  int num_max_corr_     = 5000;
 
   // Solver params
   // NOTE(hlim): The final `solver_noise_bound` becomes `voxel_size_` * `solver_noise_bound_gain_`
-  float solver_noise_bound_gain_ = 1.0;
-  float solver_noise_bound_      = voxel_size_ * solver_noise_bound_gain_;
-  bool use_quatro_               = false;
+  float solver_noise_bound_ = voxel_size_ * 1.0;
+  bool use_quatro_          = false;
 
   KISSMatcherConfig(const float voxel_size         = 0.3,
                     const float use_voxel_sampling = true,
@@ -90,12 +88,10 @@ struct KISSMatcherConfig {
     normal_radius_ = normal_r_gain * voxel_size;
     fpfh_radius_   = fpfh_r_gain * voxel_size;
 
-    num_max_corr_            = num_max_corr;
-    robin_noise_bound_gain_  = robin_noise_bound_gain;
-    solver_noise_bound_gain_ = solver_noise_bound_gain;
+    num_max_corr_ = num_max_corr;
 
-    robin_noise_bound_  = voxel_size_ * robin_noise_bound_gain_;
-    solver_noise_bound_ = voxel_size_ * solver_noise_bound_gain_;
+    robin_noise_bound_  = voxel_size_ * robin_noise_bound_gain;
+    solver_noise_bound_ = voxel_size_ * solver_noise_bound_gain;
 
     if ((robin_noise_bound_ > 1.0) && enable_noise_bound_clamping) {
       std::cout

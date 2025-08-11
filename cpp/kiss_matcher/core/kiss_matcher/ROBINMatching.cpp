@@ -32,7 +32,7 @@ std::vector<std::pair<int, int>> ROBINMatching::establishCorrespondences(
     std::vector<Eigen::Vector3f>& target_points,
     Feature& source_features,
     Feature& target_features,
-    std::string robin_mode,
+    RobinMode robin_mode,
     float tuple_scale,
     bool use_ratio_test) {
   pointcloud_.clear();
@@ -54,7 +54,7 @@ std::vector<std::pair<int, int>> ROBINMatching::establishCorrespondences(
   return corres_;
 }
 
-void ROBINMatching::match(const std::string& robin_mode, float tuple_scale, bool use_ratio_test) {
+void ROBINMatching::match(RobinMode robin_mode, float tuple_scale, bool use_ratio_test) {
   KDTree feature_tree_i(flann::KDTreeSingleIndexParams(15));
   buildKDTree(features_[fi_], &feature_tree_i);
 
@@ -140,9 +140,9 @@ void ROBINMatching::match(const std::string& robin_mode, float tuple_scale, bool
   // Compatibility test for outlier pruning
   corres_.clear();
   auto t_rejection_init = std::chrono::high_resolution_clock::now();
-  if (robin_mode == "None") {
+  if (robin_mode == RobinMode::none) {
     runTupleTest(corres_cross_checked_, corres_, tuple_scale);
-  } else if (robin_mode == "max_core" || robin_mode == "max_clique") {
+  } else if (robin_mode == RobinMode::max_clique || robin_mode == RobinMode::max_core) {
     applyOutlierPruning(corres_cross_checked_, corres_, robin_mode);
   } else {
     std::invalid_argument("Wrong ROBIN mode has come.");
@@ -280,7 +280,7 @@ void ROBINMatching::runTupleTest(const std::vector<std::pair<int, int>>& corres,
 
 void ROBINMatching::applyOutlierPruning(const std::vector<std::pair<int, int>>& corres,
                                         std::vector<std::pair<int, int>>& corres_out,
-                                        const std::string& robin_mode) {
+                                        RobinMode robin_mode) {
   if (!corres.empty()) {
     size_t ncorr = corres.size();
     std::vector<bool> is_already_included(ncorr, false);
@@ -300,9 +300,9 @@ void ROBINMatching::applyOutlierPruning(const std::vector<std::pair<int, int>>& 
     const auto& filtered_indices = [&]() {
       // NOTE(hlim): Just use max core mode.
       // `max_clique` not only took more time but also showed slightly worse performance.
-      if (robin_mode == "max_core") {
+      if (robin_mode == RobinMode::max_core) {
         return robin::FindInlierStructure(g, robin::InlierGraphStructure::MAX_CORE);
-      } else if (robin_mode == "max_clique") {
+      } else if (robin_mode == RobinMode::max_clique) {
         return robin::FindInlierStructure(g, robin::InlierGraphStructure::MAX_CLIQUE);
       } else {
         throw std::runtime_error("Something's wrong!");
@@ -328,7 +328,7 @@ void ROBINMatching::applyOutlierPruning(const std::vector<std::pair<int, int>>& 
 std::vector<size_t> ROBINMatching::applyOutlierPruning(
     const std::vector<Eigen::Vector3f>& src_matched,
     const std::vector<Eigen::Vector3f>& tgt_matched,
-    const std::string& robin_mode) {
+    RobinMode robin_mode) {
   if (src_matched.size() != tgt_matched.size()) {
     std::runtime_error("The size of `src_matched` and `tgt_matched` should be same.");
   }
@@ -351,9 +351,9 @@ std::vector<size_t> ROBINMatching::applyOutlierPruning(
   const auto& filtered_indices = [&]() {
     // NOTE(hlim): Just use max core mode.
     // `max_clique` not only took more time but also showed slightly worse performance.
-    if (robin_mode == "max_core") {
+    if (robin_mode == RobinMode::max_core) {
       return robin::FindInlierStructure(g, robin::InlierGraphStructure::MAX_CORE);
-    } else if (robin_mode == "max_clique") {
+    } else if (robin_mode == RobinMode::max_clique) {
       return robin::FindInlierStructure(g, robin::InlierGraphStructure::MAX_CLIQUE);
     } else {
       throw std::runtime_error("Something's wrong!");
